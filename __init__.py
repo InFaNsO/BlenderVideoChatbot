@@ -27,6 +27,7 @@ from .GeminiChatOperator import GeminiChatOperator
 from .GeminiChatPanel import GeminiChatPanel
 from .VideoGenerationPanel import VideoGeneratrionPanel
 from .VideoGenerationOperator import VideoGenerationOperator
+from .PexelsVideoOperator import PexelsVideoOperator
 
 class HelloWorldOperator(bpy.types.Operator):
     bl_idname = "object.hello_world_operator"
@@ -54,8 +55,12 @@ class HelloWorldPanel(bpy.types.Panel):
 def register():
     bpy.utils.register_class(GeminiChatOperator)
     bpy.utils.register_class(GeminiChatPanel)
+
     bpy.utils.register_class(VideoGenerationOperator)
     bpy.utils.register_class(VideoGeneratrionPanel)
+    
+    bpy.utils.register_class(PexelsVideoOperator)
+
     # Register the property on the scene
     bpy.types.Scene.message_prop_ai = bpy.props.StringProperty(name="InputText")
     VideoGenerationPanel.register()
@@ -63,8 +68,12 @@ def register():
 def unregister():
     bpy.utils.unregister_class(GeminiChatOperator)
     bpy.utils.unregister_class(GeminiChatPanel)
+    
     bpy.utils.unregister_class(VideoGenerationOperator)
     bpy.utils.unregister_class(VideoGeneratrionPanel)
+
+    bpy.utils.unregister_class(PexelsVideoOperator)
+
     # UnRegister the property on the scene
     del bpy.types.Scene.message_prop_ai
     VideoGenerationPanel.unregister()

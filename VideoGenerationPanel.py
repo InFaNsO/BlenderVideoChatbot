@@ -20,7 +20,7 @@ class VideoGeneratrionPanel(bpy.types.Panel):
         script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
 
         if "title" in script:
-            for element in script["script"]:
+            for sceneIndex, element in enumerate(script["script"]):
                 outerBox = layout.box()
                 col = outerBox.column()
                 row = col.row()
@@ -36,9 +36,12 @@ class VideoGeneratrionPanel(bpy.types.Panel):
                 inCol = innerBox.column()
                 inRow = inCol.row()
 
-                for shot in element["shots_description"]:
+                for shotIndex, shot in enumerate(element["shots_description"]):
                     label = "" + str(shot["duration"]) + "sec: " + shot["description"]
                     inRow.label(text=label)
+                    op = inRow.operator("object.pexelsvideo", text="Find Visuals")
+                    op.sceneIndex = sceneIndex
+                    op.shotIndex = shotIndex
                     inRow = inCol.row()
                     
 
