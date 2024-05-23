@@ -11,4 +11,26 @@ class VideoEditorPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
-        layout.operator("object.videoinsert", text="Insert Visuals")
+
+        
+        script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
+
+        if "title" not in script:
+            layout.label(text="No Script In Scene")
+            return {'FINISHED'}
+        
+        allShotsHavVideo = True
+        for scene in script["script"]:
+                shots = scene["shots_description"]
+                for shot in shots:
+                     if "video" not in shot:
+                        allShotsHavVideo = False
+                        break
+                     
+        if allShotsHavVideo == False:
+            layout.operator("object.finddownloadshots", text="Download All Shots")
+        else:
+             layout.label(text="Need to add Insert All")
+
+
+

@@ -30,7 +30,7 @@ from .VideoGenerationPanel import VideoGeneratrionPanel
 from .VideoGenerationOperator import VideoGenerationOperator
 from .VideoEditorPanel import VideoEditorPanel
 from .VideoInsertOperator import VideoInsertOperator
-from .FindInsertShotsOperator import FindInsertShotsOperator
+from .FindDownloadShotsOperator import FindDownloadShotsOperator
 
 from .PexelsVideoOperator import PexelsVideoOperator
 
@@ -65,6 +65,7 @@ def register():
     bpy.utils.register_class(VideoGeneratrionPanel)
     bpy.utils.register_class(VideoEditorPanel)
     bpy.utils.register_class(VideoInsertOperator)
+    bpy.utils.register_class(FindDownloadShotsOperator)
     
     bpy.utils.register_class(PexelsVideoOperator)
 
@@ -80,6 +81,7 @@ def unregister():
     bpy.utils.unregister_class(VideoGeneratrionPanel)
     bpy.utils.unregister_class(VideoEditorPanel)
     bpy.utils.unregister_class(VideoInsertOperator)
+    bpy.utils.unregister_class(FindDownloadShotsOperator)
 
     bpy.utils.unregister_class(PexelsVideoOperator)
 

@@ -10,7 +10,10 @@ headers = {
 
 params = {
     'query': "",
-    'per_page': 1
+    'per_page': 3,
+    'page': 1,
+    'orientation': "landscape",
+    'size': "medium"
 }
 
 url = "https://api.pexels.com/videos/search"

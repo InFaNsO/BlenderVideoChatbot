@@ -62,5 +62,11 @@ class VideoGenerationOperator(bpy.types.Operator):
             print("Response body:", response.text)
 
         context.scene["VideoGenerationChatHistory"] = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        print(context.scene["VideoGenerationChatHistory"])
+        print("\n\n")
+        sc = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
+        print(sc)
+
+
 
         return {'FINISHED'}
