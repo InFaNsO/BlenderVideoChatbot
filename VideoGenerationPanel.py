@@ -4,7 +4,7 @@ import json
 class VideoGeneratrionPanel(bpy.types.Panel):
     bl_label = "Video Generation"
     bl_idname = "OBJECT_PT_Video_Gen"
-    bl_space_type = 'VIEW_3D'
+    bl_space_type = 'SEQUENCE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Gemini"
 
@@ -16,14 +16,14 @@ class VideoGeneratrionPanel(bpy.types.Panel):
         layout.prop(context.scene, "total_video_duration", text="Duration")
         layout.operator("object.videogeneration", text="Generate Video")
 
-
         script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
-
         if "title" in script:
             for sceneIndex, element in enumerate(script["script"]):
                 outerBox = layout.box()
                 col = outerBox.column()
                 row = col.row()
+                label = "Scene " + str(sceneIndex)
+                row.label(text=label)
                 label = "Starting Time: " + str(element["time_start"]) 
                 row.label(text=label)
                 label = "Duration: " + str(element["duration"])
@@ -37,11 +37,19 @@ class VideoGeneratrionPanel(bpy.types.Panel):
                 inRow = inCol.row()
 
                 for shotIndex, shot in enumerate(element["shots_description"]):
+                    label = "Shot " + str(shotIndex)
+                    inRow.label(text=label)
+                    inRow = inCol.row()
                     label = "" + str(shot["duration"]) + "sec: " + shot["description"]
                     inRow.label(text=label)
-                    op = inRow.operator("object.pexelsvideo", text="Find Visuals")
-                    op.sceneIndex = sceneIndex
-                    op.shotIndex = shotIndex
+                    if "video" in shot:
+                        op = inRow.operator("object.videoinsert", text="Insert Visual")
+                        op.sceneIndex = sceneIndex
+                        op.shotIndex = shotIndex    
+                    else:
+                        op = inRow.operator("object.pexelsvideo", text="Find Visuals")
+                        op.sceneIndex = sceneIndex
+                        op.shotIndex = shotIndex
                     inRow = inCol.row()
                     
 

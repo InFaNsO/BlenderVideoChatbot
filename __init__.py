@@ -25,8 +25,13 @@ bl_info = {
 import bpy
 from .GeminiChatOperator import GeminiChatOperator 
 from .GeminiChatPanel import GeminiChatPanel
+
 from .VideoGenerationPanel import VideoGeneratrionPanel
 from .VideoGenerationOperator import VideoGenerationOperator
+from .VideoEditorPanel import VideoEditorPanel
+from .VideoInsertOperator import VideoInsertOperator
+from .FindInsertShotsOperator import FindInsertShotsOperator
+
 from .PexelsVideoOperator import PexelsVideoOperator
 
 class HelloWorldOperator(bpy.types.Operator):
@@ -58,6 +63,8 @@ def register():
 
     bpy.utils.register_class(VideoGenerationOperator)
     bpy.utils.register_class(VideoGeneratrionPanel)
+    bpy.utils.register_class(VideoEditorPanel)
+    bpy.utils.register_class(VideoInsertOperator)
     
     bpy.utils.register_class(PexelsVideoOperator)
 
@@ -71,6 +78,8 @@ def unregister():
     
     bpy.utils.unregister_class(VideoGenerationOperator)
     bpy.utils.unregister_class(VideoGeneratrionPanel)
+    bpy.utils.unregister_class(VideoEditorPanel)
+    bpy.utils.unregister_class(VideoInsertOperator)
 
     bpy.utils.unregister_class(PexelsVideoOperator)
 
