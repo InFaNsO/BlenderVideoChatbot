@@ -9,6 +9,8 @@ chatData = {
    ]
 }
 
+key = "AIzaSyC3_giMgrHILN5qZoH6cEA12OrdzeDBzxU"
+
 class GeminiChatOperator(bpy.types.Operator):
     bl_idname = "object.chatbot"
     bl_label = "ChatBot"
@@ -27,7 +29,7 @@ class GeminiChatOperator(bpy.types.Operator):
           chatData=json.loads(context.scene.get("ChatHistory"))
           self.firstTime = False
 
-        chatData["contents"].append(GetData(self, tex, "user"))     
+        chatData["contents"].append(GetData(tex, "user"))     
         print("Sending following Request to google\n")
 
         print(json.dumps(chatData))
@@ -38,7 +40,7 @@ class GeminiChatOperator(bpy.types.Operator):
         if response.status_code == 200:
           print("Request Sucessfull!!")
           print("Response Body: \n",response.json())
-          chatData["contents"].append(GetData(self, response.json()["candidates"][0]["content"]["parts"][0]["text"], "model"))
+          chatData["contents"].append(GetData(response.json()["candidates"][0]["content"]["parts"][0]["text"], "model"))
           print(chatData)
         else:
           print("Request failed with status code:", response.status_code)
@@ -53,7 +55,7 @@ class GeminiChatOperator(bpy.types.Operator):
 
 
 
-url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyC3_giMgrHILN5qZoH6cEA12OrdzeDBzxU"
+url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={key}"
 
 header = {
     "Content-Type": "application/json"
@@ -65,7 +67,7 @@ d = {
    ]
 }
 
-def GetData(self, text, role):
+def GetData(text, role):
     data = {
        "role": role,
        "parts": [

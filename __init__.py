@@ -27,10 +27,11 @@ from .GeminiChatOperator import GeminiChatOperator
 from .GeminiChatPanel import GeminiChatPanel
 
 from .VideoGenerationPanel import VideoGeneratrionPanel
-from .VideoGenerationOperator import VideoGenerationOperator
+from .VideoGenerationOperator import VideoGenerationOperator, GenerateBaseScriptOperator, GenerateShotsForSceneOperator
 from .VideoEditorPanel import VideoEditorPanel
-from .VideoInsertOperator import VideoInsertOperator
+from .VideoInsertOperator import VideoInsertOperator, VideoInsertAllOperator
 from .FindDownloadShotsOperator import FindDownloadShotsOperator
+from .AudioGeneratorOperator import AudioGeneratorOperator, InsertAudioOperator
 
 from .PexelsVideoOperator import PexelsVideoOperator
 
@@ -61,11 +62,18 @@ def register():
     bpy.utils.register_class(GeminiChatOperator)
     bpy.utils.register_class(GeminiChatPanel)
 
+    bpy.utils.register_class(GenerateBaseScriptOperator)
+    bpy.utils.register_class(GenerateShotsForSceneOperator)
     bpy.utils.register_class(VideoGenerationOperator)
     bpy.utils.register_class(VideoGeneratrionPanel)
+
     bpy.utils.register_class(VideoEditorPanel)
     bpy.utils.register_class(VideoInsertOperator)
+    bpy.utils.register_class(VideoInsertAllOperator)
     bpy.utils.register_class(FindDownloadShotsOperator)
+
+    bpy.utils.register_class(AudioGeneratorOperator)
+    bpy.utils.register_class(InsertAudioOperator)
     
     bpy.utils.register_class(PexelsVideoOperator)
 
@@ -77,13 +85,21 @@ def unregister():
     bpy.utils.unregister_class(GeminiChatOperator)
     bpy.utils.unregister_class(GeminiChatPanel)
     
+    bpy.utils.unregister_class(GenerateBaseScriptOperator)
+    bpy.utils.unregister_class(GenerateShotsForSceneOperator)
     bpy.utils.unregister_class(VideoGenerationOperator)
     bpy.utils.unregister_class(VideoGeneratrionPanel)
+
     bpy.utils.unregister_class(VideoEditorPanel)
     bpy.utils.unregister_class(VideoInsertOperator)
+    bpy.utils.unregister_class(VideoInsertAllOperator)
     bpy.utils.unregister_class(FindDownloadShotsOperator)
 
+    bpy.utils.unregister_class(AudioGeneratorOperator)
+    bpy.utils.unregister_class(InsertAudioOperator)
+
     bpy.utils.unregister_class(PexelsVideoOperator)
+
 
     # UnRegister the property on the scene
     del bpy.types.Scene.message_prop_ai

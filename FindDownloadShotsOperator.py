@@ -34,7 +34,7 @@ class FindDownloadShotsOperator(bpy.types.Operator):
             return {'FINISHED'}
 
         #clear the directory for use
-        delete_contents_of_folder(path)
+        #delete_contents_of_folder(path)
 
         #loop through all scenes and their shots
         for indexScene, scene in enumerate(script["script"]):
@@ -64,7 +64,10 @@ class FindDownloadShotsOperator(bpy.types.Operator):
                                 break
                         
                         #Download the file now
-                        nameFile = DownloadFile(downloadVideoObj, sceneIndex=indexScene, shotIndex=indexShot, query=shot["description"])
+                        mainKey = ""
+                        if "title_key" in script:
+                            mainKey += script["title_key"]
+                        nameFile = DownloadFile(downloadVideoObj, sceneIndex=indexScene, shotIndex=indexShot, query=mainKey + shot["key_words"])
                         script["script"][indexScene]["shots_description"][indexShot]["video"] = nameFile
                     else:
                         print(f"Request failed with status code {pexelResponse.status_code}")

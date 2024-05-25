@@ -16,7 +16,7 @@ bpy.ops.sequencer.split(frame=91, channel=2, type='SOFT', use_cursor_position=Tr
 
 '''
 
-def SecToFrame(sec, frameRate=30):
+def SecToFrame(sec, frameRate=25):
     return sec * frameRate
 
 class VideoInsertOperator(bpy.types.Operator):
@@ -68,10 +68,15 @@ class VideoInsertOperator(bpy.types.Operator):
         startFrame = int(SecToFrame(sec=scene["time_start"]) + SecToFrame(sec=shotsDuration))
         print("Starting Frame: " + str(startFrame))
 
-        bpy.ops.sequencer.movie_strip_add(filepath=shot["video"], directory=dir, files=[{"name":p[-1], "name":p[-1]}], frame_start=startFrame, channel=1, overlap_shuffle_override=False, fit_method='FILL', adjust_playback_rate=True)
+        InsertVideo(shot["video"], dir, startFrame)
+        #bpy.ops.sequencer.movie_strip_add(filepath=shot["video"], directory=dir, files=[{"name":p[-1], "name":p[-1]}], frame_start=startFrame, channel=1, overlap_shuffle_override=False, fit_method='FILL', adjust_playback_rate=True)
 
         durationFrame = int(SecToFrame(sec=shot["duration"]))
-        context.active_sequence_strip.frame_final_duration = durationFrame
+        print(str(context.scene.sequence_editor.sequences_all))
+        ReduceDuration(context, durationFrame, p[-1])
+
+
+        #context.active_sequence_strip.frame_final_duration = durationFrame
         #bpy.ops.sequencer.split(frame=splitFrame, channel=channelNum, type="SOFT", side="RIGHT")
         #bpy.ops.sequencer.delete()
 
@@ -104,5 +109,53 @@ class VideoInsertOperator(bpy.types.Operator):
 
                 shotsDuration += shot["duration"]
         '''
+
+        return {'FINISHED'}
+
+
+def InsertVideo(filePath, dir, fram_start, channel=3):
+        bpy.ops.sequencer.movie_strip_add(filepath=filePath, directory=dir, frame_start=fram_start, channel=channel, overlap_shuffle_override=False, fit_method='FILL', adjust_playback_rate=True, sound=False)
+ 
+def ReduceDuration(context, endOfClipFrame, sequenseName):
+    print(sequenseName)
+    selected = context.active_sequence_strip
+    print(str(selected))
+    bpy.ops.sequencer.select_all(action='DESELECT')
+    bpy.ops.sequencer.select(deselect_all=True)
+    selected = context.active_sequence_strip
+    print(str(selected))
+    strip = context.scene.sequence_editor.sequences_all.get(sequenseName)
+    print(str(strip))
+    strip.frame_final_duration = endOfClipFrame
+
+class VideoInsertAllOperator(bpy.types.Operator):
+    bl_idname = "object.videoinsertall"
+    bl_label = "VideoInsertAll"
+
+    def execute(self, context):
+        #Get The Script from scene
+        script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
+
+        if "title" not in script:
+            self.report({'WARNING'}, "Script Empty!")
+            return {'FINISHED'}
+        
+        sequence_editor = bpy.context.scene.sequence_editor_create()
+
+        insertFrame = 0
+        for indexScene, scene in enumerate(script["script"]):
+                shots = scene["shots_description"]
+                shotDuration = 0
+                for indexShot, shot in enumerate(shots):
+                    pathArr = shot["video"].split("/")
+                    dir = ""
+                    for ele in pathArr[:-1]:
+                        dir += ele + "/"
+                    
+                    vid_clip = sequence_editor.sequences.new_movie(name=f"Scene {indexScene} Shot {indexShot}", filepath=shot["video"], channel=3, frame_start=insertFrame, fit_method='FILL')
+                    end_frame = int(bpy.utils.time_to_frame(shot["duration"]))
+                    vid_clip.frame_final_duration = end_frame
+                    insertFrame+= end_frame
+
 
         return {'FINISHED'}

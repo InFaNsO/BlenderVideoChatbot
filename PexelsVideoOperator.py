@@ -43,6 +43,10 @@ class PexelsVideoOperator(bpy.types.Operator):
             self.report({'WARNING'}, "Script Empty!")
             return {'FINISHED'}
         
+        mainKey = ""
+        if "title_key" in script:
+            mainKey += script["title_key"]
+        
         scene = script["script"][self.sceneIndex]
         shot = scene["shots_description"][self.shotIndex]
 

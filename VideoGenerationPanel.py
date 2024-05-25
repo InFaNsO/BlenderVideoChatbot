@@ -8,15 +8,100 @@ class VideoGeneratrionPanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = "Gemini"
 
+    def DoesAudioExists(self, context):
+        script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
+        if "title" not in script:
+            return False
+        
+        for scene in script["script"]:
+            if "audio" not in scene:
+                return False
+
+        return True
+    
+    def DoesScriptExists(self, context):
+        script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
+        if "title" not in script:
+            return False
+        return True
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
         
         layout.prop(context.scene, "title_input", text="Title")
         layout.prop(context.scene, "total_video_duration", text="Duration")
-        layout.operator("object.videogeneration", text="Generate Video")
+        r = layout.row()
+        #check if audio exists
+        if self.DoesAudioExists(context=context):
+            r.operator("object.insertaudio", text="Insert Audio")
+        else:
+            r.operator("object.audiogenerator", text="Generate Audio")
+    
+        if not self.DoesScriptExists(context=context):
+            r.operator("object.generatebasescript", text="Generate Base Script")
+        else:
+            r.label(text="Basic Script Generated")
 
+        if not self.DoesScriptExists(context):
+            return
+        
         script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
+
+        for sceneIndex, element in enumerate(script["script"]):
+            outerBox = layout.box()
+            col = outerBox.column()
+            row = col.row()
+            
+            #First Line
+            row.label(text=f"Scene {sceneIndex}")
+
+            if "time_start" in element:
+                row.label(text="Start Time: " + str(element["time_start"]))
+            
+            if "duration" in element:
+                row.label(text="Duration: " + str(element["duration"]))
+
+            #Second Line
+            row = col.row()
+            row.label(text="" + (element["speaker"]) + ":" + element["text"])
+
+            if "shots_description" not in element:
+                row = col.row()
+                op = row.operator("object.generateshotsforscene", text="Generate Shots")
+                op.sceneIndex = sceneIndex
+                continue
+
+            row = col.row()
+            for shotIndex, shot in enumerate(element["shots_description"]):
+                shotBox = row.box()
+                shotCol = shotBox.column()
+                shotRow = shotCol.row()
+
+                shotRow.label(text="Shot " + str(shotIndex))
+                shotRow.label(text="Duration " + str(shot["duration"]))
+                shotRow = shotCol.row()
+                shotRow.label(text="Description: " + shot["description"])
+                shotRow = shotCol.row()
+                shotRow.label(text="Key Words: " + shot["key_words"])
+
+                shotRow = shotCol.row()
+                shotRow.label(text="Edit Shot")
+                if "video" in shot:
+                    op = shotRow.operator("object.videoinsert", text="Insert Visual")
+                    op.sceneIndex = sceneIndex
+                    op.shotIndex = shotIndex
+                else:
+                    ops = shotRow.operator("object.pexelsvideo", text="Find Visuals")
+                    ops.sceneIndex = sceneIndex
+                    ops.shotIndex = shotIndex
+                row = col.row()
+
+        
+
+
+
+        '''
         if "title" in script:
             for sceneIndex, element in enumerate(script["script"]):
                 outerBox = layout.box()
@@ -51,6 +136,7 @@ class VideoGeneratrionPanel(bpy.types.Panel):
                         op.sceneIndex = sceneIndex
                         op.shotIndex = shotIndex
                     inRow = inCol.row()
+        '''
                     
 
 
