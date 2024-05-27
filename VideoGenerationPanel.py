@@ -88,9 +88,23 @@ class VideoGeneratrionPanel(bpy.types.Panel):
                 shotRow = shotCol.row()
                 shotRow.label(text="Edit Shot")
                 if "video" in shot:
-                    op = shotRow.operator("object.videoinsert", text="Insert Visual")
-                    op.sceneIndex = sceneIndex
-                    op.shotIndex = shotIndex
+                    stripName = f"Scene {sceneIndex} Shot {shotIndex}" 
+                    strip = None
+                    sequence_editor = bpy.context.scene.sequence_editor_create()
+
+                    for strp in sequence_editor.sequences:
+                        if stripName == strp.name:
+                            strip = strp
+                            break
+
+                    if strip == None:
+                        op = shotRow.operator("object.videoinsert", text="Insert Visual")
+                        op.sceneIndex = sceneIndex
+                        op.shotIndex = shotIndex
+                    else:
+                        op = shotRow.operator("object.replacevideo", text="Replace Clip")
+                        op.sceneIndex = sceneIndex
+                        op.shotIndex = shotIndex
                 else:
                     ops = shotRow.operator("object.pexelsvideo", text="Find Visuals")
                     ops.sceneIndex = sceneIndex

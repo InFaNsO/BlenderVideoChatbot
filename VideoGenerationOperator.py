@@ -158,7 +158,6 @@ class GenerateShotsForSceneOperator(bpy.types.Operator):
         speech = script["script"][self.sceneIndex]["text"]
 
         print("Generating Shots for speech: ", speech, "\n\n")
-        print("Duration should be: ", script["script"][self.sceneIndex]["duration"])
 
         prompt  = "You are a Video Producer for a famous YouTube Channel. Currently you are working on a video titled: " + script["title"] + ". "
         prompt += "You have to suggest what all shots would go in it's scene "+ str(self.sceneIndex) + " which is " + str(script["script"][self.sceneIndex]["duration"]) + " seconds long."

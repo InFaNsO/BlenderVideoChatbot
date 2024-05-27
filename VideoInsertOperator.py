@@ -60,7 +60,7 @@ class VideoInsertOperator(bpy.types.Operator):
             else:
                 break
 
-        p = shot["video"].split('/')
+        p = shot["video"]["path"].split('/')
         dir = ""
         for ele in p[:-1]:
             dir += ele + "/"
@@ -142,20 +142,43 @@ class VideoInsertAllOperator(bpy.types.Operator):
         
         sequence_editor = bpy.context.scene.sequence_editor_create()
 
+        channels = [4,5]
+        transitionLength = 12 #Frames
         insertFrame = 0
+        shotCount = 0
         for indexScene, scene in enumerate(script["script"]):
                 shots = scene["shots_description"]
-                shotDuration = 0
                 for indexShot, shot in enumerate(shots):
-                    pathArr = shot["video"].split("/")
-                    dir = ""
-                    for ele in pathArr[:-1]:
-                        dir += ele + "/"
+
+                    end_frame = int(bpy.utils.time_to_frame(shot["duration"])) + transitionLength
+                    channelNum = channels[shotCount % 2]
+                    print(f"Inserting clip: Scene {indexScene} Shot {indexShot}\nStarting Frame: {insertFrame}\nEnding Frame: {end_frame}\nChannel: {channelNum}\nNext Start should be: {insertFrame + (end_frame - transitionLength)}\n")
                     
-                    vid_clip = sequence_editor.sequences.new_movie(name=f"Scene {indexScene} Shot {indexShot}", filepath=shot["video"], channel=3, frame_start=insertFrame, fit_method='FILL')
-                    end_frame = int(bpy.utils.time_to_frame(shot["duration"]))
+                    vid_clip = sequence_editor.sequences.new_movie(name=f"Scene {indexScene} Shot {indexShot}", filepath=shot["video"]["path"], channel=channelNum, frame_start=insertFrame, fit_method='FILL')
                     vid_clip.frame_final_duration = end_frame
-                    insertFrame+= end_frame
+                    print(f"Insert Frame: {insertFrame}\nEnd Frame: {end_frame}\nNew Insert Frame {insertFrame + end_frame}\n\n")
+                    insertFrame += (end_frame - transitionLength)
+                    shotCount += 1
+
+        strip_prv = sequence_editor.sequences_all["Scene 0 Shot 0"]
+        strip_current = None
+
+        transitionChannel = 6
+        for indexScene, scene in enumerate(script["script"]):
+                shots = scene["shots_description"]
+                for indexShot, shot in enumerate(shots):
+                     if indexScene == 0 and indexShot == 0:
+                          continue 
+                     strip_current = sequence_editor.sequences_all[f"Scene {indexScene} Shot {indexShot}"]
+
+                     if not strip_prv and not strip_current:
+                          self.report({'WARNING'}, "Strip not found Empty!")
+                          break
+                     
+                     sequence_editor.sequences.new_effect(name=f"Transition Scene {indexScene} Shot {indexShot}", type="CROSS", channel=transitionChannel, seq1=strip_prv, seq2=strip_current, frame_start=strip_current.frame_final_start, frame_end=strip_prv.frame_final_end)
+                     strip_prv = strip_current
+
+                        
 
 
         return {'FINISHED'}

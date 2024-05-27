@@ -30,7 +30,7 @@ from .VideoGenerationPanel import VideoGeneratrionPanel
 from .VideoGenerationOperator import VideoGenerationOperator, GenerateBaseScriptOperator, GenerateShotsForSceneOperator
 from .VideoEditorPanel import VideoEditorPanel
 from .VideoInsertOperator import VideoInsertOperator, VideoInsertAllOperator
-from .FindDownloadShotsOperator import FindDownloadShotsOperator
+from .FindDownloadShotsOperator import FindDownloadShotsOperator, ReplaceVideoOperator
 from .AudioGeneratorOperator import AudioGeneratorOperator, InsertAudioOperator
 
 from .PexelsVideoOperator import PexelsVideoOperator
@@ -71,6 +71,7 @@ def register():
     bpy.utils.register_class(VideoInsertOperator)
     bpy.utils.register_class(VideoInsertAllOperator)
     bpy.utils.register_class(FindDownloadShotsOperator)
+    bpy.utils.register_class(ReplaceVideoOperator)
 
     bpy.utils.register_class(AudioGeneratorOperator)
     bpy.utils.register_class(InsertAudioOperator)
@@ -94,6 +95,7 @@ def unregister():
     bpy.utils.unregister_class(VideoInsertOperator)
     bpy.utils.unregister_class(VideoInsertAllOperator)
     bpy.utils.unregister_class(FindDownloadShotsOperator)
+    bpy.utils.unregister_class(ReplaceVideoOperator)
 
     bpy.utils.unregister_class(AudioGeneratorOperator)
     bpy.utils.unregister_class(InsertAudioOperator)
