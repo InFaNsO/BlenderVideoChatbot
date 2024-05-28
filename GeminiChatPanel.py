@@ -20,8 +20,8 @@ class GeminiChatPanel(bpy.types.Panel):
         col = mainBox.column()
         row = mainBox.row()
 
+        chatBox = row.box()
         if "contents" in chatHistory:
-            chatBox = row.box()
             chatCol = chatBox.column()
             chatRow = chatCol.row()
             for content in chatHistory["contents"]:
@@ -29,6 +29,9 @@ class GeminiChatPanel(bpy.types.Panel):
                 chatRow.label(text=t)
                 chatRow = chatCol.row() 
         else:
+            chatCol = chatBox.column()
+            chatRow = chatCol.row()
+            chatRow.label(text="Chat History")
             layout.label(text="\n")
     
         row = col.row()

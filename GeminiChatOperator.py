@@ -1,6 +1,7 @@
 import bpy
 import requests
 import json
+from .LocalVariables import google_api_key as key
 
 chatHistoryStr = "ChatHistory"
 chatData = {
@@ -8,8 +9,6 @@ chatData = {
       
    ]
 }
-
-key = "AIzaSyC3_giMgrHILN5qZoH6cEA12OrdzeDBzxU"
 
 class GeminiChatOperator(bpy.types.Operator):
     bl_idname = "object.chatbot"

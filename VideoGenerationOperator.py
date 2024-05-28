@@ -81,6 +81,7 @@ class GenerateBaseScriptOperator(bpy.types.Operator):
 
         prompt  = f"You are a script writer for a promiment YouTube channel. You have to write a script for your next video which is about {title}, and should be {duration} seconds long. "
         prompt += f"You have to make sure the script uses elements of suspense, suprise, and feels rewarding for the viewer. "
+        prompt += f"Use the chat history to find out about the directions I want for the video "
         prompt += f"The script should use severel hooks connecting different scenes to keep the audience engaged. "
         prompt += f"YOUR response should strictly follow the given JSON format.\n{json.dumps(formatInitial)}\n"
         prompt += "in your json response the property should be in double quotes and not in single quote"
