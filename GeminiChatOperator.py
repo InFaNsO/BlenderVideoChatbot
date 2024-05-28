@@ -25,8 +25,8 @@ class GeminiChatOperator(bpy.types.Operator):
         
         print("InputText Set by panel: ", self.input_text)
 
-        if self.firstTime == True:
-          chatData=json.loads(context.scene.get("ChatHistory"))
+        if self.firstTime == True and context.scene.get("ChatHistory"):
+          chatData=json.loads(context.scene.get("ChatHistory", "{}"))
           self.firstTime = False
 
         chatData["contents"].append(GetData(tex, "user"))     

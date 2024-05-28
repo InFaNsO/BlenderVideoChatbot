@@ -1,6 +1,7 @@
 import bpy
 import json
 import requests
+from .LocalVariables import path 
 
 apiKey = "uWby7NPaTxbZyq4jZZ7w28PjkNJnkheZlaGamaUfelvVEUiIRVKKipeF"
 
@@ -17,8 +18,6 @@ params = {
 }
 
 url = "https://api.pexels.com/videos/search"
-
-path = "C:/Users/Bhavil/Desktop/Codes/ChatBotAddOn/BlenderVideoChatbot/downloads/"
 
 class PexelsVideoOperator(bpy.types.Operator):
     bl_idname = "object.pexelsvideo"

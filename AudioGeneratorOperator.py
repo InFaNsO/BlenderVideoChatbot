@@ -3,7 +3,7 @@ import requests
 import json
 import base64
 from .GeminiChatOperator import key, header
-from .PexelsVideoOperator import path
+from .LocalVariables import path
 
 synth_url = f"https://texttospeech.googleapis.com/v1beta1/text:synthesize?key={key}"
 
@@ -13,6 +13,7 @@ voiceName = "en-US-Journey-F"
 param = {
     "input": {
         "text": "Hey Im BG's AI app"
+        
     },
     "voice": {
         "name": voiceName,

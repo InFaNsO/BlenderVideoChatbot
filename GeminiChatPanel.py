@@ -16,18 +16,26 @@ class GeminiChatPanel(bpy.types.Panel):
         # tool = scene.myTool
 
         chatHistory = json.loads(context.scene.get("ChatHistory", "{}"))
+        mainBox = layout.box()
+        col = mainBox.column()
+        row = mainBox.row()
 
         if "contents" in chatHistory:
+            chatBox = row.box()
+            chatCol = chatBox.column()
+            chatRow = chatCol.row()
             for content in chatHistory["contents"]:
                 t = content["role"] + ": " + content["parts"][0]["text"]
-                layout.label(text=t) 
+                chatRow.label(text=t)
+                chatRow = chatCol.row() 
         else:
             layout.label(text="\n")
     
-        layout.label(text="\n")
-        layout.prop(context.scene, "message_prop_ai", text="Enter Message")
+        row = col.row()
+        row.prop(context.scene, "message_prop_ai", text="Enter Message")
 
-        op = layout.operator("object.chatbot", text="Send Message")
+        row = col.row()
+        op = row.operator("object.chatbot", text="Send Message")
         op.input_text = context.scene.message_prop_ai
-
+        op = row.operator("object.generatebasescript", text="Generate Script")
     

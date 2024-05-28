@@ -53,7 +53,7 @@ shotsFormat = {
     ]
 }
 
-chat = d
+chat_data = d
 
 def fix_json_quotes(json_str):
     # Replace single quotes around property names and values, but not within words
@@ -71,6 +71,8 @@ class GenerateBaseScriptOperator(bpy.types.Operator):
     bl_idname = "object.generatebasescript"
     bl_label = "GenerateBaseScript"
 
+    useChatHistory = bpy.props.BoolProperty(name="UseChatHistory")  #type: ignore
+
     def execute(self, context):
         title = context.scene.title_input
         duration = context.scene.total_video_duration
@@ -82,6 +84,12 @@ class GenerateBaseScriptOperator(bpy.types.Operator):
         prompt += f"The script should use severel hooks connecting different scenes to keep the audience engaged. "
         prompt += f"YOUR response should strictly follow the given JSON format.\n{json.dumps(formatInitial)}\n"
         prompt += "in your json response the property should be in double quotes and not in single quote"
+
+        chat = None
+        if self.useChatHistory:
+            chat = json.loads(context.scene.get("ChatHistory"))
+        else:
+            chat = chat_data
 
         #global chat
         chat["contents"].append(GetData(prompt, "user"))
@@ -108,6 +116,7 @@ class GenerateBaseScriptOperator(bpy.types.Operator):
         print(sc)
 
         return {'FINISHED'}
+
 
 
 shot_chat = d
