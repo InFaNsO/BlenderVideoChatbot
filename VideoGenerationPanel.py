@@ -1,29 +1,30 @@
 import bpy
 import json
 
+def DoesAudioExists(context):
+    script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
+    if "title" not in script:
+        return False
+        
+    for scene in script["script"]:
+        transcript = scene["transcription"]
+        if "audio_file" not in transcript:
+            return False
+
+    return True
+
+def DoesScriptExists(context):
+    script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
+    if "title" not in script:
+        return False
+    return True
+
 class VideoGeneratrionPanel(bpy.types.Panel):
     bl_label = "Video Generation"
     bl_idname = "OBJECT_PT_Video_Gen"
     bl_space_type = 'SEQUENCE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Gemini"
-
-    def DoesAudioExists(self, context):
-        script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
-        if "title" not in script:
-            return False
-        
-        for scene in script["script"]:
-            if "audio" not in scene:
-                return False
-
-        return True
-    
-    def DoesScriptExists(self, context):
-        script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
-        if "title" not in script:
-            return False
-        return True
 
     def draw(self, context):
         layout = self.layout
@@ -33,17 +34,17 @@ class VideoGeneratrionPanel(bpy.types.Panel):
         layout.prop(context.scene, "total_video_duration", text="Duration")
         r = layout.row()
         #check if audio exists
-        if self.DoesAudioExists(context=context):
+        if DoesAudioExists(context=context):
             r.operator("object.insertaudio", text="Insert Audio")
         else:
             r.operator("object.audiogenerator", text="Generate Audio")
     
-        if not self.DoesScriptExists(context=context):
+        if not DoesScriptExists(context=context):
             r.operator("object.generatebasescript", text="Generate Base Script")
         else:
             r.label(text="Basic Script Generated")
 
-        if not self.DoesScriptExists(context):
+        if not DoesScriptExists(context):
             return
         
         script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
@@ -53,18 +54,22 @@ class VideoGeneratrionPanel(bpy.types.Panel):
             col = outerBox.column()
             row = col.row()
             
+            transcript =element["transcription"]
             #First Line
             row.label(text=f"Scene {sceneIndex}")
 
-            if "time_start" in element:
-                row.label(text="Start Time: " + str(element["time_start"]))
+            if "time_start_frame" in transcript:
+                row.label(text="Start Time: " + str(bpy.utils.time_from_frame(transcript["time_start_frame"])))
             
-            if "duration" in element:
-                row.label(text="Duration: " + str(element["duration"]))
+            if "time_end_frame" in transcript:
+                row.label(text="End Time: " + str(bpy.utils.time_from_frame(transcript["time_end_frame"])))
+
+            if "duration_frame" in transcript:
+                row.label(text="Duration: " + str(bpy.utils.time_from_frame(transcript["duration_frame"])))
 
             #Second Line
             row = col.row()
-            row.label(text="" + (element["speaker"]) + ":" + element["text"])
+            row.label(text="" + (element["transcription"]["speaker"]) + ":" + element["transcription"]["text"])
 
             if "shots_description" not in element:
                 row = col.row()

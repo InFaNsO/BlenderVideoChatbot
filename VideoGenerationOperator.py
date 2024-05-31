@@ -1,4 +1,5 @@
 import bpy
+from bpy.types import Context
 import requests
 import json
 import re
@@ -32,8 +33,10 @@ formatInitial = {
     "title_key": "Search Key Words for the title",
     "script": [
         {
-            "speaker": "Narrator",
-            "text": "Dialouge that the speaker says",
+            "transcription": {
+                "speaker": "",
+                "text": ""
+            }
         }
     ]
 }
@@ -67,6 +70,44 @@ def fix_json_quotes(json_str):
     print(json_str)
     return json_str
 
+class GenerateBaseScriptFromChat(bpy.types.Operator):
+    bl_idname = "object.generatebasescriptfromchat"
+    bl_label = "GenerateBaseScriptFromChat"
+
+    def execute(self, context):
+        prompt  = f"Using the previous chats and information given, generate a script for this video. "
+        prompt += f"You have to make sure the script uses elements of suspense, suprise, and feels rewarding for the viewer. "
+        prompt += f"The script should use severel hooks connecting different scenes to keep the audience engaged. "
+        prompt += f"YOUR response should strictly follow the given JSON format.\n{json.dumps(formatInitial)}\n"
+
+        chat = json.loads(context.scene.get("ChatHistory"))
+        chat["contents"].append(GetData(prompt, "user"))
+
+        response = requests.post(url=url, headers=header, data=json.dumps(chat))
+        txt = ""
+        if response.status_code == 200:
+            print("Request Sucessfull!!")
+            print("Complete Response: \n", response.json())
+            print("\n")
+            txt = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+            print("Response Body: \n", txt)
+            txt = txt.replace("```", "")
+            txt = txt.replace("json", "")
+        else:
+            print("Request failed with status code:", response.status_code)
+            print("Response body:", response.text)
+
+        s_script = txt
+        
+
+        context.scene["VideoGenerationChatHistory"] = s_script
+        print(context.scene["VideoGenerationChatHistory"])
+        print("\n\n")
+        sc = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
+        print(sc)
+
+        return {'FINISHED'}
+
 class GenerateBaseScriptOperator(bpy.types.Operator):
     bl_idname = "object.generatebasescript"
     bl_label = "GenerateBaseScript"
@@ -86,13 +127,8 @@ class GenerateBaseScriptOperator(bpy.types.Operator):
         prompt += f"YOUR response should strictly follow the given JSON format.\n{json.dumps(formatInitial)}\n"
         prompt += "in your json response the property should be in double quotes and not in single quote"
 
-        chat = None
-        if self.useChatHistory:
-            chat = json.loads(context.scene.get("ChatHistory"))
-        else:
-            chat = chat_data
+        chat = chat_data
 
-        #global chat
         chat["contents"].append(GetData(prompt, "user"))
 
         response = requests.post(url=url, headers=header, data=json.dumps(chat))
@@ -123,46 +159,144 @@ class GenerateBaseScriptOperator(bpy.types.Operator):
 shot_chat = d
 shot_chat_scene = -1
 
+def SetGlobalVar(sceneIndex):
+    global shot_chat
+    global shot_chat_scene
+
+    if shot_chat_scene != sceneIndex:
+        shot_chat = d
+        shot_chat_scene = sceneIndex
+
+def SetShotDurations(duration , shots):
+    finalDuration = duration
+    shotsDuration = 0.0
+
+    for shot in shots:
+        shotsDuration += shot["duration"]
+
+    if shotsDuration == finalDuration:
+        print("Shots are of correct length")
+        return shots
+        
+    if shotsDuration > finalDuration:
+        print(f"Shots are longer- shot dur: {shotsDuration} scene dur: {finalDuration}")
+        avgShotDur = finalDuration / len(shots)
+        for shot in shots:
+            shot["duration"] = avgShotDur
+    else:
+        print(f"Shots are shorter- shot dur: {shotsDuration} scene dur: {finalDuration}")
+        diff = (finalDuration - shotsDuration) / len(shots)
+        for shot in shots:
+            shot["duration"] += diff
+
+    return shots
+
+class GenerateAllShotsForAllScenes(bpy.types.Operator):
+    bl_idname = "object.generateallshotsforallscenes"
+    bl_label = "GenerateAllShotsForAllScenes"
+
+    def execute(self, context: Context):
+        script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
+        print(json.dumps(script, indent=4))
+
+        for indexScene, scene in enumerate(script["script"]):
+            print(f"\n\nSetting Shots for scene {indexScene} with text-\n")
+
+            SetGlobalVar(indexScene)
+            transcript = scene["transcription"]
+            speech = transcript["text"]
+
+            print(speech + "\n")
+
+            
+            prompt  = "You are a Video Producer for a famous YouTube Channel. Currently you are working on a video titled: " + script["title"] + ". "
+            prompt += "You have to suggest what all shots would go in it's scene "+ str(indexScene) + " which is " + str(bpy.utils.time_from_frame(transcript["duration_frame"])) + " seconds long."
+            prompt += "In the scene narrator is saying-\n" + speech + "\n"
+            prompt += "Your Response should strictly be in the following json format:\n" + json.dumps(shotsFormat)
+            prompt += "YOU HAVE TO MAKE SURE THAT in your json response the array of shots_description is not empty and the property should be in double quotes and not in single quote"
+
+            print("prompt: ", prompt)
+
+            global shot_chat
+            shot_chat["contents"].append(GetData(prompt, "User"))
+
+            response = requests.post(url=url, headers=header, data=json.dumps(shot_chat))
+
+            if response.status_code != 200:
+                print(f"Error in synthing speech: {response.status_code} - {response.text}")
+                return {'FINISHED'}
+
+            print("\nResponse-\n" + json.dumps(response.json(), indent=4))
+
+
+
+            s_reply = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+            s_reply = s_reply.replace("```", "")
+            s_reply = s_reply.replace("json", "")
+
+            print(s_reply)
+            desc = json.loads(s_reply)
+            s_reply = json.dumps(desc["shots_description"])
+
+            print(f"{response.json()}\n\n{s_reply}")
+
+            reply = json.loads(s_reply)
+
+            count = 1
+            while len(reply) == 0:
+                response = requests.post(url=url, headers=header, data=json.dumps(shot_chat))
+
+                if response.status_code != 200:
+                    print(f"Error in synthing speech: {response.status_code} - {response.text}")
+                    return {'FINISHED'}
+
+                s_reply = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+                s_reply = s_reply.replace("```", "")
+                s_reply = s_reply.replace("json", "")
+
+                print(s_reply)
+                desc = json.loads(s_reply)
+                s_reply = json.dumps(desc["shots_description"])
+
+                print(f"{response.json()}\n\n{s_reply}")
+
+                reply = json.loads(s_reply)
+                count += 1
+
+                if count > 5:
+                    print(f"Error in synthing speech: {response.status_code} - {response.text}")
+                    print("Reply for shots description empty even after multiple attempts")
+                    return {'FINISHED'}
+
+
+            reply = SetShotDurations(transcript["duration_frame"] / float(context.scene.render.fps), reply)
+            
+            for index, sh in enumerate(reply):
+                for key, value in sh.items():
+                    if isinstance(value, list):
+                        keyWords = ""
+                        for keyWord in value:
+                            keyWords += keyWord
+                        reply[index]["key_words"] = keyWords
+
+            script["script"][indexScene]["shots_description"] = reply
+
+            print(json.dumps(script["script"][indexScene], indent=4))
+
+            s_json = json.dumps(script)
+            context.scene["VideoGenerationChatHistory"] = s_json
+            print(s_json)
+
+        return {'FINISHED'}
+
 class GenerateShotsForSceneOperator(bpy.types.Operator):
     bl_idname = "object.generateshotsforscene"
     bl_label = "GenerateShotForScene"
 
     sceneIndex: bpy.props.IntProperty(name = "Index For scene")     # type: ignore
 
-    def SetGlobalVar(self):
-        global shot_chat
-        global shot_chat_scene
-
-        if shot_chat_scene != self.sceneIndex:
-            shot_chat = d
-            shot_chat_scene = self.sceneIndex
-
-    def SetShotDurations(self, scene , shots):
-        finalDuration = scene["duration"]
-        shotsDuration = 0.0
-
-        for shot in shots:
-            shotsDuration += shot["duration"]
-
-        if shotsDuration == finalDuration:
-            print("Shots are of correct length")
-            return shots
-        
-        if shotsDuration > finalDuration:
-            print(f"Shots are longer- shot dur: {shotsDuration} scene dur: {finalDuration}")
-            diff = (shotsDuration - finalDuration) / len(shots)
-            for shot in shots:
-                shot["duration"] -= diff
-        else:
-            print(f"Shots are shorter- shot dur: {shotsDuration} scene dur: {finalDuration}")
-            diff = (finalDuration - shotsDuration) / len(shots)
-            for shot in shots:
-                shot["duration"] += diff
-
-        return shots
-
     def execute(self, context):
-        self.SetGlobalVar()
+        SetGlobalVar(self.sceneIndex)
 
         script = json.loads(context.scene.get("VideoGenerationChatHistory", "{}"))
         speech = script["script"][self.sceneIndex]["text"]
@@ -193,7 +327,7 @@ class GenerateShotsForSceneOperator(bpy.types.Operator):
         s_reply = json.dumps(desc["shots_description"])
 
         reply = json.loads(s_reply)
-        reply = self.SetShotDurations(script["script"][self.sceneIndex], reply)
+        reply = SetShotDurations(script["script"][self.sceneIndex], reply)
         script["script"][self.sceneIndex]["shots_description"] = reply
 
         s_json = json.dumps(script)

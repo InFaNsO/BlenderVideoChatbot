@@ -108,7 +108,7 @@ class FindDownloadShotsOperator(bpy.types.Operator):
                         print("Failed to find Videos for Scene: " + str(indexScene) + " Shot: " + str(indexShot))
                         print(pexelResponse)   
 
-        print(json.dumps(script["script"][indexScene]))
+        print(json.dumps(script["script"][indexScene], indent=4))
 
         dump_json = json.dumps(script)
         context.scene["VideoGenerationChatHistory"] = dump_json      

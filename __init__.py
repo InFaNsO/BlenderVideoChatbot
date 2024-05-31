@@ -27,11 +27,12 @@ from .GeminiChatOperator import GeminiChatOperator
 from .GeminiChatPanel import GeminiChatPanel
 
 from .VideoGenerationPanel import VideoGeneratrionPanel
-from .VideoGenerationOperator import VideoGenerationOperator, GenerateBaseScriptOperator, GenerateShotsForSceneOperator
+from .VideoGenerationOperator import VideoGenerationOperator, GenerateBaseScriptOperator, GenerateShotsForSceneOperator, GenerateBaseScriptFromChat, GenerateAllShotsForAllScenes
 from .VideoEditorPanel import VideoEditorPanel
 from .VideoInsertOperator import VideoInsertOperator, VideoInsertAllOperator
 from .FindDownloadShotsOperator import FindDownloadShotsOperator, ReplaceVideoOperator
 from .AudioGeneratorOperator import AudioGeneratorOperator, InsertAudioOperator
+from .AudioGenerationWithTranscription import PrintElevelLabsVoicesOperator, GenerateAudioAndSubtitlesOperator, InsertAudioAndSubtitlesOperator
 
 from .PexelsVideoOperator import PexelsVideoOperator
 
@@ -65,6 +66,8 @@ def register():
     bpy.utils.register_class(GenerateBaseScriptOperator)
     bpy.utils.register_class(GenerateShotsForSceneOperator)
     bpy.utils.register_class(VideoGenerationOperator)
+    bpy.utils.register_class(GenerateBaseScriptFromChat)
+    bpy.utils.register_class(GenerateAllShotsForAllScenes)
     bpy.utils.register_class(VideoGeneratrionPanel)
 
     bpy.utils.register_class(VideoEditorPanel)
@@ -75,6 +78,11 @@ def register():
 
     bpy.utils.register_class(AudioGeneratorOperator)
     bpy.utils.register_class(InsertAudioOperator)
+
+    bpy.utils.register_class(PrintElevelLabsVoicesOperator)
+    bpy.utils.register_class(GenerateAudioAndSubtitlesOperator)
+    bpy.utils.register_class(InsertAudioAndSubtitlesOperator)
+
     
     bpy.utils.register_class(PexelsVideoOperator)
 
@@ -89,6 +97,8 @@ def unregister():
     bpy.utils.unregister_class(GenerateBaseScriptOperator)
     bpy.utils.unregister_class(GenerateShotsForSceneOperator)
     bpy.utils.unregister_class(VideoGenerationOperator)
+    bpy.utils.unregister_class(GenerateBaseScriptFromChat)
+    bpy.utils.unregister_class(GenerateAllShotsForAllScenes)
     bpy.utils.unregister_class(VideoGeneratrionPanel)
 
     bpy.utils.unregister_class(VideoEditorPanel)
@@ -100,12 +110,17 @@ def unregister():
     bpy.utils.unregister_class(AudioGeneratorOperator)
     bpy.utils.unregister_class(InsertAudioOperator)
 
+    bpy.utils.unregister_class(PrintElevelLabsVoicesOperator)
+    bpy.utils.unregister_class(GenerateAudioAndSubtitlesOperator)
+    bpy.utils.unregister_class(InsertAudioAndSubtitlesOperator)
+
     bpy.utils.unregister_class(PexelsVideoOperator)
 
 
     # UnRegister the property on the scene
     del bpy.types.Scene.message_prop_ai
     VideoGenerationPanel.unregister()
+
 
 if __name__ == "__main__":
     register()

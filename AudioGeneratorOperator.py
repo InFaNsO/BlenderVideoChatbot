@@ -87,7 +87,6 @@ class InsertAudioOperator(bpy.types.Operator):
             return {'FINISHED'}
         
         sequence_editor = bpy.context.scene.sequence_editor_create()
-
         insertFrame = 0
         for indexScene, scene in enumerate(script["script"]):
             if "audio" not in scene:
